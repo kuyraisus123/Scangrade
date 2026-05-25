@@ -60,7 +60,7 @@ router.post('/sheet', upload.single('image'), async (req: Request, res: Response
     const totalScore     = session?.template?.totalScore     ?? 100
     const scorePerQ      = totalQuestions > 0 ? totalScore / totalQuestions : 2
 
-    const gradeRes = await fetch('http://localhost:5000/grade', {
+    const gradeRes = await fetch(`${process.env.PYTHON_URL || 'http://localhost:5000'}/grade`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

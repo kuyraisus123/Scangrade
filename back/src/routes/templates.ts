@@ -184,7 +184,7 @@ router.post('/detect-answer', upload.single('image'), async (req: Request, res: 
 
     const imageBase64 = req.file.buffer.toString('base64')
     const { default: fetch } = await import('node-fetch')
-    const detectRes = await fetch('http://localhost:5000/detect-answer', {
+    const detectRes = await fetch(`${process.env.PYTHON_URL || 'http://localhost:5000'}/detect-answer`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ image: imageBase64, bounding_boxes: boundingBoxes }),
