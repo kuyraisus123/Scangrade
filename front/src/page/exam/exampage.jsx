@@ -248,7 +248,7 @@ export default function ExamPage() {
   const handleDeleteTemplate = async (id) => {
     if (!confirm('ต้องการลบ template นี้ออกหรือไม่?')) return;
     try {
-      await fetch(`http://localhost:3001/api/templates/${id}`, {
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/templates/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
       });
@@ -585,7 +585,7 @@ export default function ExamPage() {
             if (!dbSet) continue;
             const setAnswerKey = confirmedAnswerKey.filter(k => k.setIndex === i);
             if (setAnswerKey.length === 0) continue;
-            await fetch('http://localhost:3001/api/templates/confirm-answer', {
+            await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/templates/confirm-answer`, {
               method:  'POST',
               headers: {
                 'Content-Type': 'application/json',
