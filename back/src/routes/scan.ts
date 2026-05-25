@@ -98,11 +98,15 @@ router.post('/sheet', upload.single('image'), async (req: Request, res: Response
     }
 
     const detectedId = gradeData.detected_student_id ?? null
-const existingSheet = detectedId
-  ? await prisma.scannedSheet.findFirst({
-      where: { sessionId, detectedStudentId: detectedId },
-    })
-  : null
+    const existingSheet = detectedId
+      ? await prisma.scannedSheet.findFirst({
+          where: {
+            detectedStudentId: detectedId,
+            session: { templateId: session?.template?.id, setId },
+          },
+          orderBy: { createdAt: 'desc' },
+        })
+      : null
 
 let sheet: any
 if (existingSheet) {
