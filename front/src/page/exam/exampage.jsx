@@ -679,21 +679,7 @@ export default function ExamPage() {
                   {subjects.map(s=>(<option key={s.id} value={`${s.code}|${s.name}`}>{s.code} — {s.name}</option>))}
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-xs font-semibold text-slate-600">ปีการศึกษา</label>
-                  <select name="year" value={form.year} onChange={handleFormChange} disabled={!!examId} className={inputCls}>
-                    <option value="" disabled>เลือกปี...</option>
-                    {["2569","2568","2567","2566","2565"].map(y=><option key={y} value={y}>{y}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-slate-600">ภาคเรียน</label>
-                  <select name="semester" value={form.semester} onChange={handleFormChange} disabled={!!examId} className={inputCls}>
-                    <option>ภาคเรียนที่ 1</option><option>ภาคเรียนที่ 2</option><option>ภาคฤดูร้อน</option>
-                  </select>
-                </div>
-              </div>
+
               <div>
                 <label className="text-xs font-semibold text-slate-600">รูปแบบข้อสอบ</label>
                 <select name="examType" value={form.examType} onChange={handleFormChange} disabled={!!examId} className={inputCls}>
