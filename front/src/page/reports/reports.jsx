@@ -35,6 +35,7 @@ export default function Reports() {
 
   const subjectData = subjects.map(sub => {
     const subTemplates = templates.filter(t => t.subjectId === sub.id);
+    if (subTemplates.length === 0) return null;
     const allSheets    = subTemplates.flatMap(t =>
       t.sets?.flatMap(s => s.scanSessions?.flatMap(ss => ss.sheets || []) || []) || []
     );
@@ -64,7 +65,7 @@ export default function Reports() {
       passed:    passCount,
       status,
     };
-  });
+  }).filter(Boolean);
 
   // unique years จาก templates
   const allYears = [...new Set(templates.map(t => t.year).filter(Boolean))].sort((a, b) => b - a);
