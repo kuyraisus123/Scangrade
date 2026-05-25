@@ -133,7 +133,7 @@
 
                     <div className="flex gap-2 mb-3">
                       <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-indigo-50 text-indigo-600">ปี {s.year}</span>
-                      <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-slate-100 text-slate-500">{s.term}</span>
+                      <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-slate-100 text-slate-500">ภาคเรียนที่ {s.term}</span>
                     </div>
 
                     <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mb-3">

@@ -277,7 +277,7 @@ export default function Dashboard() {
                   ปี {s.year}
                 </span>
                 <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-slate-100 text-slate-500">
-                  {s.term}
+                  ภาคเรียนที่ {s.term}
                 </span>
               </div>
             </div>
