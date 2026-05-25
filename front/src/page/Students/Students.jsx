@@ -4,7 +4,6 @@ import { getSubjects, getStudents, createStudent, updateStudent, deleteStudent, 
 
 const inputCls = "w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200 bg-slate-50 text-slate-800 transition placeholder:text-slate-400";
 
-// ── parse CSV ─────────────────────────────────────────────────────────────────
 function parseCSV(text) {
   const lines = text.trim().split("\n").filter(Boolean);
   const results = [];
@@ -17,16 +16,18 @@ function parseCSV(text) {
 }
 
 export default function Students() {
-  const [subjects,       setSubjects]       = useState([]);
+  const [subjects,        setSubjects]        = useState([]);
   const [selectedSubject, setSelectedSubject] = useState(null);
-  const [students,       setStudents]       = useState([]);
-  const [loading,        setLoading]        = useState(false);
-  const [search,         setSearch]         = useState("");
-  const [showAdd,        setShowAdd]        = useState(false);
-  const [editTarget,     setEditTarget]     = useState(null);
-  const [delTarget,      setDelTarget]      = useState(null);
-  const [importResult,   setImportResult]   = useState(null);
-  const [form,           setForm]           = useState({ studentId: "", name: "" });
+  const [students,        setStudents]        = useState([]);
+  const [loading,         setLoading]         = useState(false);
+  const [search,          setSearch]          = useState("");
+  const [showAdd,         setShowAdd]         = useState(false);
+  const [editTarget,      setEditTarget]      = useState(null);
+  const [delTarget,       setDelTarget]       = useState(null);
+  const [importResult,    setImportResult]    = useState(null);
+  const [form,            setForm]            = useState({ studentId: "", name: "" });
+  const [selected,        setSelected]        = useState(new Set());
+  const [showDelSelected, setShowDelSelected] = useState(false);
   const fileRef = useRef(null);
 
   useEffect(() => {
@@ -39,6 +40,7 @@ export default function Students() {
   useEffect(() => {
     if (!selectedSubject) return;
     setLoading(true);
+    setSelected(new Set());
     getStudents(selectedSubject.id)
       .then(setStudents)
       .catch(() => setStudents([]))
@@ -50,6 +52,43 @@ export default function Students() {
     s.studentId.includes(search) ||
     s.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  const allSelected = filtered.length > 0 && filtered.every(s => selected.has(s.id));
+
+  const toggleSelect = (id) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    if (allSelected) {
+      setSelected(prev => {
+        const next = new Set(prev);
+        filtered.forEach(s => next.delete(s.id));
+        return next;
+      });
+    } else {
+      setSelected(prev => {
+        const next = new Set(prev);
+        filtered.forEach(s => next.add(s.id));
+        return next;
+      });
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    try {
+      await Promise.all([...selected].map(id => deleteStudent(id)));
+      setStudents(p => p.filter(s => !selected.has(s.id)));
+      setSelected(new Set());
+      setShowDelSelected(false);
+    } catch {
+      alert("ลบไม่สำเร็จ");
+    }
+  };
 
   const handleAdd = async () => {
     if (!form.studentId || !form.name || !selectedSubject) return;
@@ -84,7 +123,6 @@ export default function Students() {
     }
   };
 
-  // ── Import CSV ──────────────────────────────────────────────────────────────
   const handleFileImport = async (e) => {
     const file = e.target.files?.[0];
     if (!file || !selectedSubject) return;
@@ -94,7 +132,6 @@ export default function Students() {
     try {
       const result = await importStudents(selectedSubject.id, rows);
       setImportResult(result);
-      // รีโหลดรายชื่อ
       const updated = await getStudents(selectedSubject.id);
       setStudents(updated);
     } catch (err) {
@@ -111,13 +148,18 @@ export default function Students() {
   return (
     <div className="min-h-screen px-4 sm:px-8 lg:px-20 py-6">
 
-      {/* Header */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div className="flex items-center gap-2">
           <Users size={20} className="text-indigo-500" />
           <h1 className="text-base font-semibold text-slate-800">จัดการนักศึกษา</h1>
         </div>
         <div className="flex gap-2 flex-wrap">
+          {selected.size > 0 && (
+            <button onClick={() => setShowDelSelected(true)}
+              className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-xl border border-red-200 text-red-500 hover:bg-red-50 transition-colors">
+              <Trash2 size={14} /> ลบที่เลือก ({selected.size})
+            </button>
+          )}
           <button onClick={() => fileRef.current?.click()}
             className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-xl border border-indigo-200 text-indigo-600 hover:bg-indigo-50 transition-colors">
             <Upload size={14} /> นำเข้า CSV
@@ -132,7 +174,6 @@ export default function Students() {
         </div>
       </div>
 
-      {/* Import result banner */}
       {importResult && (
         <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-3 mb-4">
           <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
@@ -146,7 +187,6 @@ export default function Students() {
         </div>
       )}
 
-      {/* CSV format hint */}
       <div className="flex items-start gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 mb-5 text-xs text-slate-500">
         <AlertCircle size={14} className="shrink-0 mt-0.5 text-slate-400" />
         <span>รูปแบบ CSV: <code className="bg-white px-1.5 py-0.5 rounded border border-slate-200">รหัสนักศึกษา,ชื่อ-นามสกุล</code> (ไม่ต้องมีหัวตาราง) เช่น <code className="bg-white px-1.5 py-0.5 rounded border border-slate-200">6500000,สมชาย ใจดี</code></span>
@@ -154,7 +194,6 @@ export default function Students() {
 
       <div className="flex flex-col lg:flex-row gap-5">
 
-        {/* Subject selector */}
         <div className="w-full lg:w-64 shrink-0">
           <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden"
             style={{ boxShadow: "0 2px 12px rgba(99,102,241,0.06)" }}>
@@ -180,7 +219,6 @@ export default function Students() {
           </div>
         </div>
 
-        {/* Student table */}
         <div className="flex-1 min-w-0">
           <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden"
             style={{ boxShadow: "0 2px 12px rgba(99,102,241,0.06)" }}>
@@ -210,7 +248,11 @@ export default function Students() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-slate-100">
-                      <th className="text-left text-xs font-semibold text-slate-400 px-5 py-3 w-8">#</th>
+                      <th className="px-5 py-3 w-8">
+                        <input type="checkbox" checked={allSelected} onChange={toggleAll}
+                          className="rounded border-slate-300 text-indigo-600 cursor-pointer" />
+                      </th>
+                      <th className="text-left text-xs font-semibold text-slate-400 py-3 w-8">#</th>
                       <th className="text-left text-xs font-semibold text-slate-400 py-3 pr-3">รหัสนักศึกษา</th>
                       <th className="text-left text-xs font-semibold text-slate-400 py-3 pr-3">ชื่อ-นามสกุล</th>
                       <th className="text-left text-xs font-semibold text-slate-400 py-3 pr-3">คะแนนล่าสุด</th>
@@ -222,9 +264,16 @@ export default function Students() {
                       const latestSheet = s.sheets?.sort((a, b) =>
                         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
                       )[0];
+                      const isSelected = selected.has(s.id);
                       return (
-                        <tr key={s.id} className="border-b border-slate-50 hover:bg-indigo-50/20 transition-colors">
-                          <td className="py-3 px-5 text-xs text-slate-300 font-mono">{i + 1}</td>
+                        <tr key={s.id}
+                          className="border-b border-slate-50 transition-colors"
+                          style={{ background: isSelected ? "#eef2ff" : undefined }}>
+                          <td className="px-5 py-3">
+                            <input type="checkbox" checked={isSelected} onChange={() => toggleSelect(s.id)}
+                              className="rounded border-slate-300 text-indigo-600 cursor-pointer" />
+                          </td>
+                          <td className="py-3 pr-3 text-xs text-slate-300 font-mono">{i + 1}</td>
                           <td className="py-3 pr-3 font-mono text-sm text-slate-700">{s.studentId}</td>
                           <td className="py-3 pr-3 font-medium text-slate-800">{s.name}</td>
                           <td className="py-3 pr-3">
@@ -313,7 +362,7 @@ export default function Students() {
         </Modal>
       )}
 
-      {/* Delete Confirm */}
+      {/* Delete Single Confirm */}
       {delTarget && (
         <Modal title="ลบนักศึกษา" onClose={() => setDelTarget(null)}>
           <p className="text-sm text-slate-500 mb-5 text-center">
@@ -325,6 +374,25 @@ export default function Students() {
               ยกเลิก
             </button>
             <button onClick={handleDelete}
+              className="flex-1 py-2.5 rounded-2xl text-sm font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors">
+              ลบออก
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {/* Delete Selected Confirm */}
+      {showDelSelected && (
+        <Modal title="ลบนักศึกษาที่เลือก" onClose={() => setShowDelSelected(false)}>
+          <p className="text-sm text-slate-500 mb-5 text-center">
+            ต้องการลบนักศึกษาที่เลือกทั้งหมด <span className="font-semibold text-red-500">{selected.size} คน</span> ออกหรือไม่?
+          </p>
+          <div className="flex gap-3">
+            <button onClick={() => setShowDelSelected(false)}
+              className="flex-1 py-2.5 rounded-2xl border border-slate-200 text-sm font-medium text-slate-500 hover:bg-slate-50 transition-colors">
+              ยกเลิก
+            </button>
+            <button onClick={handleDeleteSelected}
               className="flex-1 py-2.5 rounded-2xl text-sm font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors">
               ลบออก
             </button>
