@@ -1,0 +1,2 @@
+ALTER TABLE "exam_templates" ADD COLUMN IF NOT EXISTS "year" TEXT;
+ALTER TABLE "bounding_boxes" ADD COLUMN IF NOT EXISTS "type" TEXT NOT NULL DEFAULT 'answer';
