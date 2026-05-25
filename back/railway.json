@@ -1,7 +1,7 @@
 {
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "npm ci --omit=dev"
+    "buildCommand": "echo done"
   },
   "deploy": {
     "startCommand": "npx prisma generate && npx prisma migrate deploy && npx ts-node src/server.ts",
