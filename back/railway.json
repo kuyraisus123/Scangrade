@@ -4,7 +4,7 @@
     "buildCommand": "echo done"
   },
   "deploy": {
-    "startCommand": "npx prisma generate && npx prisma migrate deploy && npx ts-node src/server.ts",
+    "startCommand": "npx ts-node src/server.ts",
     "restartPolicyType": "ON_FAILURE"
   }
 }
