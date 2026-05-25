@@ -67,7 +67,7 @@ export default function InReports() {
                 status:            sheet.status,
                 wrongItems:        sheet.wrongItems || [],
                 detectedStudentId: sheet.detectedStudentId || null,
-                student:           sheet.student || null,
+                choices:           Math.round((s.boundingBoxes?.filter((b) => b.type === 'answer').length || 0) / (t.totalQuestions || 1)) || 5,
               }
             })
           )
@@ -123,18 +123,23 @@ export default function InReports() {
     </div>
   );
 
-  const handleExport = () => {
-    if (!subject || totalStudents === 0) return
-    const exportData = filteredSheets.map((s, i) => ({
-      name:              s.name || `แผ่นที่ ${i + 1}`,
-      score:             s.score,
-      totalScore,
-      wrongItems:        s.wrongItems?.map(w => typeof w === 'object' ? w.questionNumber : w) ?? [],
-      student:           s.student ?? null,
-      detectedStudentId: s.detectedStudentId ?? null,
-    }))
-    exportExcel(subject, exportData)
-  }
+      const handleExport = () => {
+      if (!subject || totalStudents === 0) return
+      const exportData = filteredSheets.map((s, i) => {
+        const raw = s.wrongItems?.map(w => typeof w === 'object' ? w.questionNumber : w) ?? [];
+        const choices = s.choices || 5;
+        const decoded = [...new Set(raw.map(n => Math.ceil(n / choices)))].sort((a, b) => a - b);
+        return {
+          name:              s.name || `แผ่นที่ ${i + 1}`,
+          score:             s.score,
+          totalScore,
+          wrongItems:        decoded,
+          student:           s.student ?? null,
+          detectedStudentId: s.detectedStudentId ?? null,
+        }
+      })
+      exportExcel(subject, exportData)
+    }
 
   return (
     <div className="min-h-screen px-4 sm:px-8 lg:px-20 py-6">

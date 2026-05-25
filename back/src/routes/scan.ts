@@ -97,20 +97,46 @@ router.post('/sheet', upload.single('image'), async (req: Request, res: Response
       console.error('Cloudinary upload failed:', uploadErr)
     }
 
-    const sheet = await prisma.scannedSheet.create({
-      data: {
-        sessionId,
-        imageUrl,
-        score:             gradeData.score,
-        wrongCount:        gradeData.wrong_items.length,
-        status:            'done',
-        detectedStudentId: gradeData.detected_student_id ?? null,
-        wrongItems: {
-          create: gradeData.wrong_items.map((q: number) => ({ questionNumber: q })),
-        },
-      },
-      include: { wrongItems: true },
+    const detectedId = gradeData.detected_student_id ?? null
+const existingSheet = detectedId
+  ? await prisma.scannedSheet.findFirst({
+      where: { sessionId, detectedStudentId: detectedId },
     })
+  : null
+
+let sheet: any
+if (existingSheet) {
+  await prisma.wrongItem.deleteMany({ where: { sheetId: existingSheet.id } })
+  sheet = await prisma.scannedSheet.update({
+    where: { id: existingSheet.id },
+    data: {
+      imageUrl,
+      score:             gradeData.score,
+      wrongCount:        gradeData.wrong_items.length,
+      status:            'done',
+      detectedStudentId: detectedId,
+      wrongItems: {
+        create: gradeData.wrong_items.map((q: number) => ({ questionNumber: q })),
+      },
+    },
+    include: { wrongItems: true },
+      })
+    } else {
+      sheet = await prisma.scannedSheet.create({
+        data: {
+          sessionId,
+          imageUrl,
+          score:             gradeData.score,
+          wrongCount:        gradeData.wrong_items.length,
+          status:            'done',
+          detectedStudentId: detectedId,
+          wrongItems: {
+            create: gradeData.wrong_items.map((q: number) => ({ questionNumber: q })),
+          },
+        },
+        include: { wrongItems: true },
+      })
+    }
 
     let matchedStudent = null
     if (gradeData.detected_student_id && session?.template?.subjectId) {
