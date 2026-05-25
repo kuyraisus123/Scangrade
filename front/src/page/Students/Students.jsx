@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Plus, Trash2, Upload, Users, Pencil, X, CheckCircle2, AlertCircle } from "lucide-react";
 import { getSubjects, getStudents, createStudent, updateStudent, deleteStudent, importStudents } from "../../lib/api";
+import * as XLSX from "xlsx";
 
 const inputCls = "w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-200 bg-slate-50 text-slate-800 transition placeholder:text-slate-400";
 
@@ -8,9 +9,28 @@ function parseCSV(text) {
   const lines = text.trim().split("\n").filter(Boolean);
   const results = [];
   for (const line of lines) {
-    const [studentId, ...nameParts] = line.split(",").map(s => s.trim().replace(/^"|"$/g, ""));
+    // รองรับทั้ง comma และ tab
+    const sep = line.includes("\t") ? "\t" : ",";
+    const [studentId, ...nameParts] = line.split(sep).map(s => s.trim().replace(/^"|"$/g, ""));
     const name = nameParts.join(" ").trim();
-    if (studentId && name) results.push({ studentId, name });
+    if (studentId && name && !/^(รหัส|id|student)/i.test(studentId)) {
+      results.push({ studentId, name });
+    }
+  }
+  return results;
+}
+
+function parseXLSX(buffer) {
+  const wb = XLSX.read(buffer, { type: "array" });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+  const results = [];
+  for (const row of rows) {
+    const studentId = String(row[0] || "").trim();
+    const name = String(row[1] || "").trim();
+    if (studentId && name && !/^(รหัส|id|student)/i.test(studentId)) {
+      results.push({ studentId, name });
+    }
   }
   return results;
 }
@@ -129,9 +149,15 @@ export default function Students() {
   const handleFileImport = async (e) => {
     const file = e.target.files?.[0];
     if (!file || !selectedSubject) return;
-    const text = await file.text();
-    const rows = parseCSV(text);
-    if (rows.length === 0) { alert("ไม่พบข้อมูลใน CSV"); return; }
+    let rows = [];
+    if (file.name.endsWith(".xlsx") || file.name.endsWith(".xls")) {
+      const buffer = await file.arrayBuffer();
+      rows = parseXLSX(buffer);
+    } else {
+      const text = await file.text();
+      rows = parseCSV(text);
+    }
+    if (rows.length === 0) { alert("ไม่พบข้อมูลในไฟล์"); return; }
     try {
       const result = await importStudents(selectedSubject.id, rows);
       setImportResult(result);
@@ -192,7 +218,7 @@ export default function Students() {
               </button>
             </>
           )}
-          <input type="file" accept=".csv,.txt" ref={fileRef} onChange={handleFileImport} className="hidden" />
+          <input type="file" accept=".csv,.txt,.xlsx,.xls" ref={fileRef} onChange={handleFileImport} className="hidden" />
         </div>
       </div>
 
@@ -211,7 +237,7 @@ export default function Students() {
 
       <div className="flex items-start gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 mb-5 text-xs text-slate-500">
         <AlertCircle size={14} className="shrink-0 mt-0.5 text-slate-400" />
-        <span>รูปแบบ CSV: <code className="bg-white px-1.5 py-0.5 rounded border border-slate-200">รหัสนักศึกษา,ชื่อ-นามสกุล</code> (ไม่ต้องมีหัวตาราง) เช่น <code className="bg-white px-1.5 py-0.5 rounded border border-slate-200">6500000,สมชาย ใจดี</code></span>
+        <span>รองรับไฟล์ <code className="bg-white px-1.5 py-0.5 rounded border border-slate-200">.csv</code> <code className="bg-white px-1.5 py-0.5 rounded border border-slate-200">.xlsx</code> <code className="bg-white px-1.5 py-0.5 rounded border border-slate-200">.txt</code> · คอลัมน์แรก = รหัสนักศึกษา · คอลัมน์สอง = ชื่อ-นามสกุล</span>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-5">
