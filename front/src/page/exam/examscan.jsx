@@ -7,15 +7,13 @@ import { getTemplates, createSession, saveSheet } from "../../lib/api";
 
 let nextSheetId = 1;
 
-// BUG FIX: กรองเฉพาะ set ที่มี isAnswer = true อย่างน้อย 1 กรอบ
-// เพื่อป้องกันการเลือก set ที่ยังไม่ได้ยืนยันเฉลย
 function flattenToSetEntries(templates) {
   const entries = [];
   templates.forEach(t => {
     if (!t.sets || t.sets.length === 0) return;
     t.sets.forEach(s => {
       const hasAnswerKey = s.boundingBoxes?.some(b => b.isAnswer === true);
-      if (!hasAnswerKey) return; // ข้ามถ้ายังไม่มีเฉลย
+      if (!hasAnswerKey) return;
 
       entries.push({
         key:              `${t.id}__${s.id}`,
@@ -30,7 +28,6 @@ function flattenToSetEntries(templates) {
         totalQuestions:   t.totalQuestions,
         totalScore:       t.totalScore,
         scorePerQuestion: t.scorePerQuestion,
-        // คำนวณ choices จาก boundingBoxes: totalBoxes / totalQuestions
         choices: t.totalQuestions > 0
           ? Math.round((s.boundingBoxes?.filter((b) => b.type === 'answer' || !b.type).length || 0) / t.totalQuestions) || 5
           : 5,
@@ -131,11 +128,8 @@ export default function ScanExam() {
   }, []);
 
   const entries = flattenToSetEntries(templates);
-
-  // ถ้าไม่มี set ที่มีเฉลย ให้แสดงข้อความแตกต่างจากกรณีไม่มี template เลย
-  const hasTemplates   = templates.length > 0;
+  const hasTemplates    = templates.length > 0;
   const hasReadyEntries = entries.length > 0;
-
   const canScan = !!selected;
 
   const handleSelect = (entry) => {
@@ -179,12 +173,14 @@ export default function ScanExam() {
           newSheets[i].file
         );
 
+        console.log('scan response:', data);
+
         setSheets(prev => prev.map(s =>
           s.id === newSheets[i].id
             ? {
                 ...s,
                 status: 'done',
-                cloudinaryUrl: data.imageUrl ?? null, // Cloudinary URL สำหรับดูรูปในรายงาน
+                cloudinaryUrl: data.imageUrl ?? null,
                 result: {
                   score:              data.score,
                   totalScore:         data.gradeDetail?.total_score ?? selected.totalScore ?? 100,
@@ -217,14 +213,11 @@ export default function ScanExam() {
 
   const handleFileInput = (e) => {
     const files = e.target.files;
-    if (files?.length) {
-      handleFiles(files);
-    }
-    // reset value หลังจาก handleFiles รับ files ไปแล้ว
+    if (files?.length) handleFiles(files);
     setTimeout(() => { e.target.value = ""; }, 0);
   };
-  const handleDrop      = (e) => { e.preventDefault(); if (e.dataTransfer.files?.length) handleFiles(e.dataTransfer.files); };
-  const removeSheet     = (id) => setSheets(prev => prev.filter(s => s.id !== id));
+  const handleDrop  = (e) => { e.preventDefault(); if (e.dataTransfer.files?.length) handleFiles(e.dataTransfer.files); };
+  const removeSheet = (id) => setSheets(prev => prev.filter(s => s.id !== id));
 
   const doneCount       = sheets.filter(s => s.status === "done").length;
   const processingCount = sheets.filter(s => s.status === "processing").length;
@@ -247,7 +240,6 @@ export default function ScanExam() {
             </div>
           </div>
 
-          {/* กรณียังไม่มี template เลย */}
           {!hasTemplates && (
             <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3">
               <AlertCircle size={16} className="text-amber-500 shrink-0" />
@@ -257,7 +249,6 @@ export default function ScanExam() {
             </div>
           )}
 
-          {/* กรณีมี template แต่ยังไม่มี set ที่ยืนยันเฉลย */}
           {hasTemplates && !hasReadyEntries && (
             <div className="flex items-center gap-3 bg-indigo-50 border border-indigo-200 rounded-2xl px-4 py-3">
               <AlertCircle size={16} className="text-indigo-500 shrink-0" />
@@ -295,8 +286,8 @@ export default function ScanExam() {
                     <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-2xl z-50"
                       style={{ border:"1px solid rgba(99,102,241,0.15)", boxShadow:"0 16px 48px rgba(99,102,241,0.18)", minWidth:"320px" }}>
                       {entries.map((entry, idx) => {
-                        const isActive    = selected?.key === entry.key;
-                        const prevExam    = idx > 0 ? entries[idx - 1].examName : null;
+                        const isActive  = selected?.key === entry.key;
+                        const prevExam  = idx > 0 ? entries[idx - 1].examName : null;
                         const showDivider = entry.examName !== prevExam;
                         return (
                           <div key={entry.key}>
@@ -461,7 +452,6 @@ function SheetCard({ sheet, index, onRemove, onPreview }) {
         </div>
         <p className="text-xs text-slate-400 truncate mt-0.5">{sheet.file.name}</p>
 
-        {/* แสดงข้อมูลนักศึกษา */}
         {result?.matchedStudent && (
           <div className="mt-1.5 flex items-center gap-1.5">
             <span className="text-xs bg-indigo-50 text-indigo-700 border border-indigo-100 px-2 py-0.5 rounded-full font-medium">
