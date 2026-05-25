@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "ts-node src/server.ts",
     "build": "echo 'skip'",
-        "start": "npx ts-node src/server.ts"
+    "start": "npx ts-node src/server.ts"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +16,7 @@
     "@prisma/adapter-pg": "^5.22.0",
     "@prisma/client": "^5.22.0",
     "@types/pg": "^8.20.0",
+    "axios": "^1.16.1",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.10.0",
     "cors": "^2.8.6",

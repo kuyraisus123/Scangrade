@@ -44,7 +44,6 @@ router.post('/sheet', upload.single('image'), async (req: Request, res: Response
 
     const imageBase64 = req.file.buffer.toString('base64')
 
-    // ส่ง boundingBoxes พร้อม type และ isAnswer ให้ FastAPI
     const answerKey = templateSet.boundingBoxes.map((b: any) => ({
       questionNumber: b.questionNumber,
       x:        b.x,
@@ -55,34 +54,28 @@ router.post('/sheet', upload.single('image'), async (req: Request, res: Response
       type:     b.type || 'answer',
     }))
 
-    const { default: fetch } = await import('node-fetch')
     const totalQuestions = session?.template?.totalQuestions ?? 1
     const totalScore     = session?.template?.totalScore     ?? 100
     const scorePerQ      = totalQuestions > 0 ? totalScore / totalQuestions : 2
 
-    const gradeRes = await fetch(`${process.env.PYTHON_URL || 'http://localhost:5000'}/grade`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        image:              imageBase64,
-        answer_key:         answerKey,
-        total_score:        totalScore,
-        score_per_question: scorePerQ,
-        choices:            Math.round(
-          answerKey.filter((b: any) => b.type === 'answer').length /
-          (totalQuestions ?? 1)
-        ) || 5,
-      }),
+    const axios = require('axios')
+    const gradeRes = await axios.post(`${process.env.PYTHON_URL || 'http://localhost:5000'}/grade`, {
+      image:              imageBase64,
+      answer_key:         answerKey,
+      total_score:        totalScore,
+      score_per_question: scorePerQ,
+      choices:            Math.round(
+        answerKey.filter((b: any) => b.type === 'answer').length /
+        (totalQuestions ?? 1)
+      ) || 5,
     })
-
-    const gradeData = await gradeRes.json() as any
+    const gradeData = gradeRes.data
 
     if (gradeData.detail) {
       res.status(500).json({ error: gradeData.detail })
       return
     }
 
-    // เช็ค set_number ที่ detect ได้ว่าตรงกับ set ที่เลือกไหม
     const selectedSet = await prisma.templateSet.findUnique({ where: { id: setId } })
     const detectedSet = gradeData.detected_set_number
     if (detectedSet !== null && detectedSet !== undefined && selectedSet) {
@@ -96,7 +89,6 @@ router.post('/sheet', upload.single('image'), async (req: Request, res: Response
       }
     }
 
-    // Upload รูปไป Cloudinary
     let imageUrl = req.file.originalname
     try {
       const filename = `sheet_${sessionId}_${Date.now()}`
@@ -120,7 +112,6 @@ router.post('/sheet', upload.single('image'), async (req: Request, res: Response
       include: { wrongItems: true },
     })
 
-    // Auto-match นักศึกษา
     let matchedStudent = null
     if (gradeData.detected_student_id && session?.template?.subjectId) {
       try {

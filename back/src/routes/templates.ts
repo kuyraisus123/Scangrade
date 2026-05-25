@@ -80,7 +80,6 @@ router.post('/', async (req: Request, res: Response) => {
             },
           })
 
-      // ถ้าไม่มี rectangles ส่งมา → ไม่แตะ bounding boxes เดิม (เพื่อรักษา isAnswer)
       if (!set.rectangles || set.rectangles.length === 0) {
         continue
       }
@@ -101,7 +100,6 @@ router.post('/', async (req: Request, res: Response) => {
           if (!r.x || !r.w) return null;
 
           if (r.type === 'set_number') {
-            // ถ้าไม่มี qNum ให้ sort ตาม y แล้ว assign ลำดับ
             const setNumQ = r.qNum ?? (() => {
               const sorted = set.rectangles
                 .filter((x: any) => x.type === 'set_number')
@@ -118,7 +116,6 @@ router.post('/', async (req: Request, res: Response) => {
           }
 
           if (r.type === 'student_id') {
-            // encode: (qNum-1)*10 + choiceIdx + 1
             const qn = r.qNum != null && r.choiceIdx != null
               ? (r.qNum - 1) * 10 + r.choiceIdx + 1
               : (i + 1);
@@ -183,14 +180,12 @@ router.post('/detect-answer', upload.single('image'), async (req: Request, res: 
     }
 
     const imageBase64 = req.file.buffer.toString('base64')
-    const { default: fetch } = await import('node-fetch')
-    const detectRes = await fetch(`${process.env.PYTHON_URL || 'http://localhost:5000'}/detect-answer`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: imageBase64, bounding_boxes: boundingBoxes }),
+    const axios = require('axios')
+    const detectRes = await axios.post(`${process.env.PYTHON_URL || 'http://localhost:5000'}/detect-answer`, {
+      image: imageBase64,
+      bounding_boxes: boundingBoxes,
     })
-
-    const detectData = await detectRes.json() as any
+    const detectData = detectRes.data
     if (detectData.detail) {
       res.status(500).json({ error: detectData.detail })
       return
@@ -232,8 +227,8 @@ router.post('/confirm-answer', async (req: Request, res: Response) => {
 
     let updateCount = 0
     for (const box of answerKey) {
-      if (box.type !== 'answer' && box.type) continue // skip non-answer types
-      if (box.questionNumber <= 0) continue // skip invalid questionNumbers
+      if (box.type !== 'answer' && box.type) continue
+      if (box.questionNumber <= 0) continue
       const existing = templateSet.boundingBoxes.find((b: any) => b.questionNumber === box.questionNumber && b.type === 'answer')
       if (existing) {
         await prisma.boundingBox.update({
