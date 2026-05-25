@@ -27,6 +27,7 @@ export default function Students() {
   const [importResult,    setImportResult]    = useState(null);
   const [form,            setForm]            = useState({ studentId: "", name: "" });
   const [selected,        setSelected]        = useState(new Set());
+  const [selectMode,      setSelectMode]      = useState(false);
   const [showDelSelected, setShowDelSelected] = useState(false);
   const fileRef = useRef(null);
 
@@ -41,6 +42,7 @@ export default function Students() {
     if (!selectedSubject) return;
     setLoading(true);
     setSelected(new Set());
+    setSelectMode(false);
     getStudents(selectedSubject.id)
       .then(setStudents)
       .catch(() => setStudents([]))
@@ -84,6 +86,7 @@ export default function Students() {
       await Promise.all([...selected].map(id => deleteStudent(id)));
       setStudents(p => p.filter(s => !selected.has(s.id)));
       setSelected(new Set());
+      setSelectMode(false);
       setShowDelSelected(false);
     } catch {
       alert("ลบไม่สำเร็จ");
@@ -154,22 +157,41 @@ export default function Students() {
           <h1 className="text-base font-semibold text-slate-800">จัดการนักศึกษา</h1>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {selected.size > 0 && (
-            <button onClick={() => setShowDelSelected(true)}
-              className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-xl border border-red-200 text-red-500 hover:bg-red-50 transition-colors">
-              <Trash2 size={14} /> ลบที่เลือก ({selected.size})
-            </button>
+          {!selectMode ? (
+            <>
+              <button onClick={() => setSelectMode(true)} disabled={filtered.length === 0}
+                className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-40">
+                เลือก
+              </button>
+              <button onClick={() => fileRef.current?.click()}
+                className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-xl border border-indigo-200 text-indigo-600 hover:bg-indigo-50 transition-colors">
+                <Upload size={14} /> นำเข้า CSV
+              </button>
+              <button onClick={() => { setShowAdd(true); setForm({ studentId: "", name: "" }); }}
+                disabled={!selectedSubject}
+                className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-xl text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)" }}>
+                <Plus size={14} /> เพิ่มนักศึกษา
+              </button>
+            </>
+          ) : (
+            <>
+              <button onClick={toggleAll}
+                className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-xl border border-indigo-200 text-indigo-600 hover:bg-indigo-50 transition-colors">
+                {allSelected ? "ยกเลิกทั้งหมด" : "เลือกทั้งหมด"}
+              </button>
+              {selected.size > 0 && (
+                <button onClick={() => setShowDelSelected(true)}
+                  className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-xl border border-red-200 text-red-500 hover:bg-red-50 transition-colors">
+                  <Trash2 size={14} /> ลบที่เลือก ({selected.size})
+                </button>
+              )}
+              <button onClick={() => { setSelectMode(false); setSelected(new Set()); }}
+                className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors">
+                ยกเลิก
+              </button>
+            </>
           )}
-          <button onClick={() => fileRef.current?.click()}
-            className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-xl border border-indigo-200 text-indigo-600 hover:bg-indigo-50 transition-colors">
-            <Upload size={14} /> นำเข้า CSV
-          </button>
-          <button onClick={() => { setShowAdd(true); setForm({ studentId: "", name: "" }); }}
-            disabled={!selectedSubject}
-            className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-xl text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-            style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)" }}>
-            <Plus size={14} /> เพิ่มนักศึกษา
-          </button>
           <input type="file" accept=".csv,.txt" ref={fileRef} onChange={handleFileImport} className="hidden" />
         </div>
       </div>
@@ -248,11 +270,8 @@ export default function Students() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-slate-100">
-                      <th className="px-5 py-3 w-8">
-                        <input type="checkbox" checked={allSelected} onChange={toggleAll}
-                          className="rounded border-slate-300 text-indigo-600 cursor-pointer" />
-                      </th>
-                      <th className="text-left text-xs font-semibold text-slate-400 py-3 w-8">#</th>
+                      {selectMode && <th className="px-5 py-3 w-8"></th>}
+                      <th className="text-left text-xs font-semibold text-slate-400 py-3 w-8 px-5">#</th>
                       <th className="text-left text-xs font-semibold text-slate-400 py-3 pr-3">รหัสนักศึกษา</th>
                       <th className="text-left text-xs font-semibold text-slate-400 py-3 pr-3">ชื่อ-นามสกุล</th>
                       <th className="text-left text-xs font-semibold text-slate-400 py-3 pr-3">คะแนนล่าสุด</th>
@@ -269,11 +288,13 @@ export default function Students() {
                         <tr key={s.id}
                           className="border-b border-slate-50 transition-colors"
                           style={{ background: isSelected ? "#eef2ff" : undefined }}>
+                          {selectMode && (
                           <td className="px-5 py-3">
                             <input type="checkbox" checked={isSelected} onChange={() => toggleSelect(s.id)}
                               className="rounded border-slate-300 text-indigo-600 cursor-pointer" />
                           </td>
-                          <td className="py-3 pr-3 text-xs text-slate-300 font-mono">{i + 1}</td>
+                          )}
+                          <td className="py-3 px-5 text-xs text-slate-300 font-mono">{i + 1}</td>
                           <td className="py-3 pr-3 font-mono text-sm text-slate-700">{s.studentId}</td>
                           <td className="py-3 pr-3 font-medium text-slate-800">{s.name}</td>
                           <td className="py-3 pr-3">
