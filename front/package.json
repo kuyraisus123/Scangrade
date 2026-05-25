@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-  "dev": "ts-node src/server.ts",
-  "build": "npx prisma generate",
-  "start": "npx ts-node src/server.ts"
-  },
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "vite preview"
+},
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
