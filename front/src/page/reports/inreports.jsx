@@ -151,7 +151,7 @@ export default function InReports() {
               <div className="flex items-center gap-2 mt-1 flex-wrap">
                 <span className="text-xs font-mono text-slate-400">{subject.code}</span>
                 {subject.year && <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 font-medium">ปี {subject.year}</span>}
-                {subject.term && <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-medium">เทอม {subject.term}</span>}
+                {subject.term && <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-medium">{subject.term}</span>}
               </div>
             </>
           ) : (

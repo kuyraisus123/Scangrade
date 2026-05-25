@@ -91,10 +91,10 @@
           </select>
           <select value={filterTerm} onChange={e => setFilterTerm(e.target.value)}
             className="border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200 transition">
-            <option value="">ทุกเทอม</option>
-            <option value="1">เทอม 1</option>
-            <option value="2">เทอม 2</option>
-            <option value="3">เทอม 3 (ฤดูร้อน)</option>
+            <option value="">ทุกภาคเรียน</option>
+            <option value="1">ภาคเรียนที่1</option>
+            <option value="2">ภาคเรียนที่2</option>
+            <option value="3">ภาคเรียนที่3</option>
           </select>
           <span className="text-xs text-slate-400 ml-auto">แสดง {filtered.length} รายการ</span>
         </div>
@@ -133,7 +133,7 @@
 
                     <div className="flex gap-2 mb-3">
                       <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-indigo-50 text-indigo-600">ปี {s.year}</span>
-                      <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-slate-100 text-slate-500">เทอม {s.term}</span>
+                      <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-slate-100 text-slate-500">{s.term}</span>
                     </div>
 
                     <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mb-3">
