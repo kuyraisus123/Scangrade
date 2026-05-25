@@ -1,0 +1,10 @@
+{
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "npm ci"
+  },
+  "deploy": {
+    "startCommand": "npx prisma migrate deploy && npx ts-node src/server.ts",
+    "restartPolicyType": "ON_FAILURE"
+  }
+}

@@ -1,8 +1,0 @@
-[phases.setup]
-nixPkgs = ["nodejs_20"]
-
-[phases.install]
-cmds = ["npm ci"]
-
-[start]
-cmd = "npx prisma migrate deploy && npx ts-node src/server.ts"
