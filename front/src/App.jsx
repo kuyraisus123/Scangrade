@@ -6,7 +6,7 @@ import ExamPage  from "./page/exam/exampage";
 import ScanExam  from "./page/exam/examscan";
 import Reports   from "./page/reports/reports";
 import InReports from "./page/reports/inreports";
-import Students  from "./page/students/Students";
+import Students  from "./page/Students/Students";
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 
 function App() {
