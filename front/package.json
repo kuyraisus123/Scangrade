@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
   "dev": "ts-node src/server.ts",
-  "build": "npx prisma generate && ./node_modules/.bin/tsc",
-  "start": "node dist/server.js"
+  "build": "npx prisma generate",
+  "start": "npx ts-node src/server.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
