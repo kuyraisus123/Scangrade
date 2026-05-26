@@ -7,7 +7,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { clearToken } from "../lib/api";
 
 const examDropdownItems = [
-  { label: "สร้าง / กำหนดกรอบ", path: "/exam" },
+  { label: "สร้างเฉลยข้อสอบ", path: "/exam" },
   { label: "สแกนข้อสอบ",        path: "/scan" },
 ];
 
