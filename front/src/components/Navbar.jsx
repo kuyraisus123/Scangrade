@@ -8,7 +8,7 @@ import { clearToken } from "../lib/api";
 
 const examDropdownItems = [
   { label: "สร้าง / กำหนดกรอบ", path: "/exam" },
-  { label: "แสกนข้อสอบ",        path: "/scan" },
+  { label: "สแกนข้อสอบ",        path: "/scan" },
 ];
 
 // ── ดึง user จาก JWT token ใน localStorage ──────────────────────────────────
