@@ -17,7 +17,7 @@ declare global {
 }
 
 const app = express()
-app.use(cors({ origin: ['http://localhost:5173', 'https://pure-beauty-production-fcc1.up.railway.app'] }))
+app.use(cors({ origin: ['http://localhost:5173', 'https://pure-beauty-production-fcc1.up.railway.app', 'https://scangrade.up.railway.app'] }))
 app.use(express.json())
 app.use('/auth', authRouter)
 
