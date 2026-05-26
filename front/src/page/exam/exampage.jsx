@@ -145,9 +145,16 @@ export default function ExamPage() {
 
   const handleFormChange = (e) => setForm(p => ({...p, [e.target.name]: e.target.value}));
   const handleSubjectSelect = (e) => {
-    const [code, ...rest] = e.target.value.split("|");
-    setForm(p => ({...p, subjectCode:code, subject:rest.join("|")}));
-  };
+  const [code, ...rest] = e.target.value.split("|");
+  const sub = subjects.find(s => s.code === code);
+  setForm(p => ({
+    ...p,
+    subjectCode: code,
+    subject: rest.join("|"),
+    year: sub?.year || p.year,
+    semester: sub?.term === "1" ? "ภาคเรียนที่ 1" : sub?.term === "2" ? "ภาคเรียนที่ 2" : sub?.term === "3" ? "ภาคฤดูร้อน" : p.semester,
+  }));
+};
   const handleCreate = async () => {
     if (!form.name || !form.subject) return;
     setCreating(true);
@@ -684,14 +691,14 @@ export default function ExamPage() {
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="text-xs font-semibold text-slate-600">ปีการศึกษา</label>
-                  <select name="year" value={form.year} onChange={handleFormChange} disabled={!!examId} className={inputCls}>
+                  <select name="year" value={form.year} onChange={handleFormChange} disabled={!!examId || !!form.subject} className={inputCls}>
                     <option value="" disabled>เลือกปี...</option>
                     {["2569","2568","2567","2566","2565"].map(y=><option key={y} value={y}>{y}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-slate-600">ภาคเรียน</label>
-                  <select name="semester" value={form.semester} onChange={handleFormChange} disabled={!!examId} className={inputCls}>
+                  <select name="semester" value={form.semester} onChange={handleFormChange} disabled={!!examId || !!form.subject} className={inputCls}>
                     <option>ภาคเรียนที่ 1</option><option>ภาคเรียนที่ 2</option><option>ภาคฤดูร้อน</option>
                   </select>
                 </div>
