@@ -99,7 +99,7 @@ function PreviewModal({ sheet, index, onClose }) {
                         ? 'bg-red-50 text-red-500 border-red-200'
                         : 'bg-emerald-50 text-emerald-600 border-emerald-200'
                   }`}>
-                    {q}{isUnfilled ? ' —' : isWrong ? ' ✗' : ' ✓'}
+                    {q}{isUnfilled ? ' ?' : isWrong ? ' ✗' : ' ✓'}
                   </span>
                 );
               })}
