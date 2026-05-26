@@ -34,11 +34,11 @@ function Login() {
     <div className="min-h-screen flex">
       {/* Left Panel */}
       <div className="hidden md:flex w-1/2 flex-col p-12"
-        style={{ background: "linear-gradient(160deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%)" }}>
+        style={{ background: "linear-gradient(90deg, #e4dbfe 0%, #ac88ff 40%, #fff)" }}>
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-            style={{ background: "rgba(255,255,255,0.12)" }}>
-            <MdOutlineDocumentScanner className="text-4xl text-indigo-300" />
+            style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)" }}>
+            <MdOutlineDocumentScanner className="text-4xl" style={{ color: "#ffffff" }} />
           </div>
           <span className="text-white font-semibold text-3xl tracking-tight">ScanGrade</span>
         </div>
@@ -46,7 +46,7 @@ function Login() {
           <p className="text-white font-semibold text-2xl leading-relaxed mb-3">
             Grade smarter,<br />not harder.
           </p>
-          <p className="text-sm leading-relaxed text-indigo-300">
+          <p style={{ color: "#4f46e5" }} className="text-sm leading-relaxed">
             Scan, grade, and analyze exam sheets<br />in minutes — not hours.
           </p>
         </div>
@@ -58,16 +58,16 @@ function Login() {
           ].map((f) => (
             <div key={f.title} className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-sm"
-                style={{ background: "rgba(165,180,252,0.15)" }}>
+                style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)" }}>
                 {f.icon}
               </div>
               <div>
                 <p className="text-white font-medium text-sm">{f.title}</p>
-                <p className="text-xs text-indigo-400">{f.desc}</p>
+                <p style={{ color: "#4f46e5" }} className="text-xs">{f.desc}</p>
               </div>
             </div>
           ))}
-          <p className="text-xs mt-4 text-indigo-600">© 2025 ScanGrade · For instructors only</p>
+          <p className="text-xs mt-4 text-indigo-600">© 2026 ScanGrade · For instructors only</p>
         </div>
       </div>
 
@@ -108,7 +108,7 @@ function Login() {
 
             <button type="submit" disabled={loading}
               className="h-11 rounded-xl text-white text-sm font-semibold disabled:opacity-60 transition-all mt-1 shadow-md"
-              style={{ background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)" }}>
+              style={{ background: "linear-gradient(135deg, #4f46e5 0%, #a24cd1 100%)" }}>
               {loading ? "กำลังเข้าสู่ระบบ..." : "Sign in"}
             </button>
 
