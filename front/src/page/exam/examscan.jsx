@@ -111,27 +111,6 @@ function PreviewModal({ sheet, index, onClose }) {
   );
 }
 
-  async function autoRotateIfLandscape(file) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      if (img.width <= img.height) { resolve(file); return; }
-      const canvas = document.createElement('canvas');
-      canvas.width = img.height;
-      canvas.height = img.width;
-      const ctx = canvas.getContext('2d');
-      ctx.translate(canvas.width / 2, canvas.height / 2);
-      ctx.rotate(-Math.PI / 2);
-      ctx.drawImage(img, -img.width / 2, -img.height / 2);
-      canvas.toBlob(blob => {
-        resolve(new File([blob], file.name, { type: file.type }));
-      }, file.type);
-      URL.revokeObjectURL(url);
-    };
-    img.src = url;
-  });
-}
 
 export default function ScanExam() {
   const fileInputRef = useRef(null);
@@ -190,13 +169,12 @@ export default function ScanExam() {
     for (let i = 0; i < newSheets.length; i++) {
       try {
         // หมุนภาพถ้าเป็นแนวนอน
-      const fileToSend = await autoRotateIfLandscape(newSheets[i].file);
+      
       const data = await saveSheet(
-        currentSessionId,
-        selected.setId,
-        fileToSend
-      );
-
+      currentSessionId,
+      selected.setId,
+      newSheets[i].file
+    );
         console.log('scan response:', data);
 
         setSheets(prev => prev.map(s =>
