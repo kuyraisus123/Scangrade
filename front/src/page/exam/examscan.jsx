@@ -219,7 +219,26 @@ export default function ScanExam() {
     setTimeout(() => { e.target.value = ""; }, 0);
   };
   const handleDrop  = (e) => { e.preventDefault(); if (e.dataTransfer.files?.length) handleFiles(e.dataTransfer.files); };
-  const removeSheet = (id) => setSheets(prev => prev.filter(s => s.id !== id));
+  const rotateSheet = (id) => {
+  const sheet = sheets.find(s => s.id === id);
+  if (!sheet?.previewUrl) return;
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = img.height;
+    canvas.height = img.width;
+    const ctx = canvas.getContext('2d');
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.drawImage(img, -img.width / 2, -img.height / 2);
+    canvas.toBlob(blob => {
+      const newFile = new File([blob], sheet.file.name, { type: sheet.file.type });
+      const newUrl = URL.createObjectURL(blob);
+      setSheets(prev => prev.map(s => s.id === id ? { ...s, file: newFile, previewUrl: newUrl } : s));
+    }, sheet.file.type);
+  };
+  img.src = sheet.previewUrl;
+};
 
   const doneCount       = sheets.filter(s => s.status === "done").length;
   const processingCount = sheets.filter(s => s.status === "processing").length;
@@ -407,8 +426,9 @@ export default function ScanExam() {
                 <div className="flex flex-col gap-3 max-h-[460px] overflow-y-auto pr-1">
                   {sheets.map((sheet, idx) => (
                     <SheetCard key={sheet.id} sheet={sheet} index={idx}
-                      onRemove={() => removeSheet(sheet.id)}
-                      onPreview={() => setPreview({ sheet, index: idx })} />
+                    onRemove={() => removeSheet(sheet.id)}
+                    onPreview={() => setPreview({ sheet, index: idx })}
+                    onRotate={() => rotateSheet(sheet.id)} />
                   ))}
                 </div>
               )}
@@ -424,7 +444,8 @@ export default function ScanExam() {
   );
 }
 
-function SheetCard({ sheet, index, onRemove, onPreview }) {
+function SheetCard({ sheet, index, onRemove, onPreview, onRotate }) {
+  
   const isProcessing = sheet.status === "processing";
   const isError      = sheet.status === "error";
   const { result }   = sheet;
@@ -448,9 +469,12 @@ function SheetCard({ sheet, index, onRemove, onPreview }) {
             แผ่นที่ {index + 1}
             <ZoomIn size={12} className="text-slate-300" />
           </button>
-          <button onClick={onRemove} className="text-slate-300 hover:text-red-400 transition-colors shrink-0">
-            <Trash2 size={13} />
-          </button>
+          <button onClick={onRotate} className="text-slate-300 hover:text-indigo-400 transition-colors shrink-0" title="หมุน 90°">
+              ↻
+            </button>
+            <button onClick={onRemove} className="text-slate-300 hover:text-red-400 transition-colors shrink-0">
+              <Trash2 size={13} />
+            </button>
         </div>
         <p className="text-xs text-slate-400 truncate mt-0.5">{sheet.file.name}</p>
 
