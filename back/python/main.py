@@ -118,7 +118,7 @@ def read_student_id_from_region(img, box: BoundingBox, all_boxes: list = None) -
         col_w = w / num_digits
         row_h = h / 10
         # แมป row index → ตัวเลข (กระดาษเรียง 1,2,3,4,5,6,7,8,9,0)
-        ROW_TO_DIGIT = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
+        ROW_TO_DIGIT = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         digits = []
         for col in range(num_digits):
             x1 = int(col * col_w)
@@ -270,7 +270,7 @@ def grade(req: GradeRequest):
                     digit_groups[digit] = []
                 digit_groups[digit].append((box, density))
             # เรียง row จาก y น้อยไปมาก แมปกับ ROW_TO_DIGIT
-            ROW_TO_DIGIT = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
+            ROW_TO_DIGIT = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
             student_id_digits = []
             for digit in sorted(digit_groups.keys()):
                 group = digit_groups[digit]
@@ -289,8 +289,8 @@ def grade(req: GradeRequest):
                      for box in req.answer_key if box.type == "set_number"]
         if set_boxes:
             # sort ตาม y จากบนลงล่าง แล้ว assign ชุดที่ 1,2,3,4,5
-            set_boxes_sorted = sorted(set_boxes, key=lambda x: x[0].y)
-            y_to_set = {b.y: idx+1 for idx, (b, _) in enumerate(set_boxes_sorted)}
+            set_boxes_sorted = sorted(set_boxes, key=lambda x: x[0].x)
+            x_to_set = {b.x: idx+1 for idx, (b, _) in enumerate(set_boxes_sorted)}
 
             MIN_SET_DENSITY = 0.25
             best_set = None
@@ -298,9 +298,9 @@ def grade(req: GradeRequest):
             for box, density in set_boxes:
                 if density > best_set_density:
                     best_set_density = density
-                    best_set = y_to_set[box.y]
+                    best_set = x_to_set[box.x]
             detected_set_number = best_set
-            print(f"DETECTED SET: {detected_set_number} (densities: {[(y_to_set[b.y], round(d,3)) for b,d in set_boxes_sorted]})")
+            print(f"DETECTED SET: {detected_set_number} (densities: {[(x_to_set[b.x], round(d,3)) for b,d in set_boxes_sorted]})")
 
         answer_qnums = [math.ceil(box.questionNumber / choices) for box in req.answer_key if box.isAnswer and box.type == 'answer']
         print(f"answer qnums: {sorted(set(answer_qnums))[:10]}")
