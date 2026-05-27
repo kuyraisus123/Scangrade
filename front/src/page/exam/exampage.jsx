@@ -567,6 +567,7 @@ export default function ExamPage() {
         totalScore:       form.totalScore,
         sets: sets.map((s, i) => {
           // coordinate ถูกเก็บเป็น image space แล้วตั้งแต่วาด ไม่ต้องแปลงอีก
+      console.log('saving set choices:', gridConfigRef.current?.choices, 'rects sample:', s.rectangles.slice(0,2));
           return {
             id:         String(s.id),
             label:      s.label,
