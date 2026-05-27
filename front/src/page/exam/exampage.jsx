@@ -110,32 +110,36 @@ export default function ExamPage() {
       totalQuestions:   t.totalQuestions,
       totalScore:       t.totalScore,
     });
-    setExamId(t.id);
-    setSets(t.sets.map(s => ({
-      ...s,
-      previewUrl: "",
-      selectedId: null,
-      rectangles: s.boundingBoxes?.map(b => ({
-        id:        b.id,
-        x:         b.x,
-        y:         b.y,
-        w:         b.w,
-        h:         b.h,
-        isAnswer:  b.isAnswer,
-        type:      b.type || 'answer',
-        // ถอดรหัส encoded questionNumber กลับเป็น qNum + choiceIdx
-        // encoded = (qNum-1)*choices + choiceIdx + 1
-        // choices สำหรับ answer box = จำนวนตัวเลือก (default 5)
-        qNum:      b.type === 'answer' || !b.type
-          ? Math.ceil(b.questionNumber / 5)
-          : b.type === 'set_number'
-          ? b.questionNumber
-          : undefined,
-        choiceIdx: b.type === 'answer' || !b.type
-          ? (b.questionNumber - 1) % 5
-          : undefined,
-      })) || [],
-    })));
+
+  setExamId(t.id);
+  setSets(t.sets.map(s => {
+  const answerBoxes = s.boundingBoxes?.filter(b => b.type === 'answer' || !b.type) || [];
+  const maxQNum = Math.max(...answerBoxes.map(b => b.questionNumber), 0);
+  const totalAnswerBoxes = answerBoxes.length;
+  const choices = maxQNum > 0 ? Math.round(totalAnswerBoxes / Math.ceil(maxQNum / 5)) : 5;
+  return {
+    ...s,
+    previewUrl: "",
+    selectedId: null,
+    rectangles: s.boundingBoxes?.map(b => ({
+      id:        b.id,
+      x:         b.x,
+      y:         b.y,
+      w:         b.w,
+      h:         b.h,
+      isAnswer:  b.isAnswer,
+      type:      b.type || 'answer',
+      qNum: b.type === 'answer' || !b.type
+        ? Math.ceil(b.questionNumber / choices)
+        : b.type === 'set_number'
+        ? b.questionNumber
+        : undefined,
+      choiceIdx: b.type === 'answer' || !b.type
+        ? (b.questionNumber - 1) % choices
+        : undefined,
+    })) || [],
+  };
+}));
     setActiveSet(t.sets[0]?.id || null);
     setSaved(true);
     setDetected(t.sets[0]?.boundingBoxes?.some(b => b.isAnswer) || false);
