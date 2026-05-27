@@ -94,7 +94,7 @@ def get_density(thresh, x, y, w, h):
     inner = cv2.erode(inner, kernel, iterations=1)
     return float(np.count_nonzero(inner)) / inner.size
 
-def is_filled(thresh, x, y, w, h, threshold=0.28):
+def is_filled(thresh, x, y, w, h, threshold=0.15):
     return get_density(thresh, x, y, w, h) > threshold
 
 def read_student_id_from_region(img, box: BoundingBox, all_boxes: list = None) -> Optional[str]:
@@ -309,7 +309,7 @@ def grade(req: GradeRequest):
         wrong_items = []
         unfilled_items = []
         correct_count = 0
-        MIN_DENSITY = 0.35
+        MIN_DENSITY = 0.15
 
         for qnum, group in qnum_groups.items():
             answer_box = next((box for box, _ in group if box.isAnswer), None)
