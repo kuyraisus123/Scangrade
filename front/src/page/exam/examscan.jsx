@@ -120,9 +120,12 @@ function PreviewModal({ sheet, index, onClose }) {
         const canvas = document.createElement('canvas');
         canvas.width = img.height;
         canvas.height = img.width;
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.drawImage(img, -img.width / 2, -img.height / 2);
         const ctx = canvas.getContext('2d');
         ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.rotate(Math.PI / 2);
+        ctx.rotate(-Math.PI / 2);
         ctx.drawImage(img, -img.width / 2, -img.height / 2);
         canvas.toBlob(blob => {
           resolve(new File([blob], file.name, { type: file.type }));
