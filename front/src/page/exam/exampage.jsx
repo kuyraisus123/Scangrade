@@ -691,7 +691,7 @@ export default function ExamPage() {
                 <select onChange={handleSubjectSelect} disabled={!!examId} value={form.subjectCode && form.subject ? `${form.subjectCode}|${form.subject}` : ""} className={inputCls}>
                   <option value="" disabled>เลือกรายวิชา...</option>
                   {Array.from(new Map(subjects.map(s => [`${s.code}|${s.name}`, s])).values()).map(s=>(
-                    <option key={s.id} value={`${s.code}|${s.name}`}>{s.code} — {s.name}</option>
+                    <option key={s.id} value={`${s.code}|${s.name}`}>{s.code} — {s.name} (ปี {s.year} เทอม {s.term})</option>
                   ))}
                 </select>
               </div>
