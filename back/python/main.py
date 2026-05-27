@@ -94,7 +94,7 @@ def get_density(thresh, x, y, w, h):
     inner = cv2.erode(inner, kernel, iterations=1)
     return float(np.count_nonzero(inner)) / inner.size
 
-def is_filled(thresh, x, y, w, h, threshold=0.15):
+def is_filled(thresh, x, y, w, h, threshold=0.08):
     return get_density(thresh, x, y, w, h) > threshold
 
 def read_student_id_from_region(img, box: BoundingBox, all_boxes: list = None) -> Optional[str]:
@@ -189,7 +189,7 @@ def detect_answer(req: DetectAnswerRequest):
             for i, box, density in sorted(group, key=lambda x: x[1].questionNumber):
                 print(f"  qnum={qnum} qN={box.questionNumber} density={density:.3f}")
 
-        MIN_DENSITY = 0.15
+        MIN_DENSITY = 0.08
         best_choice_indices = set()
         for qnum, group in qnum_groups.items():
             best = max(group, key=lambda x: x[2])
@@ -309,7 +309,7 @@ def grade(req: GradeRequest):
         wrong_items = []
         unfilled_items = []
         correct_count = 0
-        MIN_DENSITY = 0.15
+        MIN_DENSITY = 0.08
 
         for qnum, group in qnum_groups.items():
             answer_box = next((box for box, _ in group if box.isAnswer), None)
