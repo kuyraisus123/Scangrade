@@ -57,6 +57,34 @@ def decode_image(image_b64: str):
     img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
     if img is None:
         raise ValueError("อ่านรูปภาพไม่ได้")
+    # Auto-rotate ตาม EXIF orientation
+    try:
+        import struct
+        # หา EXIF orientation tag
+        data = img_bytes
+        if data[0:2] == b'\xff\xd8':  # JPEG
+            i = 2
+            while i < len(data):
+                if data[i:i+2] == b'\xff\xe1':  # APP1 marker
+                    exif_data = data[i+4:i+4+struct.unpack('>H', data[i+2:i+4])[0]-2]
+                    if exif_data[0:4] in (b'Exif', b'II*\x00', b'MM\x00*'):
+                        # parse orientation
+                        import io
+                        from PIL import Image
+                        pil_img = Image.open(io.BytesIO(data))
+                        exif = pil_img._getexif()
+                        if exif:
+                            orientation = exif.get(274)
+                            if orientation == 3:
+                                img = cv2.rotate(img, cv2.ROTATE_180)
+                            elif orientation == 6:
+                                img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+                            elif orientation == 8:
+                                img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
+                        break
+                i += 2 + struct.unpack('>H', data[i+2:i+4])[0]
+    except:
+        pass
     return img
 
 def preprocess(img):
