@@ -18,7 +18,8 @@ declare global {
 
 const app = express()
 app.use(cors({ origin: ['http://localhost:5173', 'https://pure-beauty-production-fcc1.up.railway.app', 'https://scangrade.up.railway.app'] }))
-app.use(express.json())
+app.use(express.json({ limit: '50mb' }))
+app.use(express.urlencoded({ limit: '50mb', extended: true }))
 app.use('/auth', authRouter)
 
 app.use('/api', (req: Request, res: Response, next: NextFunction) => {
