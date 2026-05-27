@@ -149,14 +149,14 @@ export default function ExamPage() {
 
   const handleFormChange = (e) => setForm(p => ({...p, [e.target.name]: e.target.value}));
   const handleSubjectSelect = (e) => {
-  const [code, ...rest] = e.target.value.split("|");
-  const sub = subjects.find(s => s.code === code);
+  const [code, name, year, term] = e.target.value.split("|");
+  const termLabel = term === "1" ? "ภาคเรียนที่ 1" : term === "2" ? "ภาคเรียนที่ 2" : "ภาคฤดูร้อน";
   setForm(p => ({
     ...p,
     subjectCode: code,
-    subject: rest.join("|"),
-    year: sub?.year || p.year,
-    semester: sub?.term === "1" ? "ภาคเรียนที่ 1" : sub?.term === "2" ? "ภาคเรียนที่ 2" : sub?.term === "3" ? "ภาคฤดูร้อน" : p.semester,
+    subject: name,
+    year: year || p.year,
+    semester: termLabel,
   }));
 };
   const handleCreate = async () => {
@@ -690,8 +690,8 @@ export default function ExamPage() {
                 <label className="text-xs font-semibold text-slate-600">รายวิชา</label>
                 <select onChange={handleSubjectSelect} disabled={!!examId} value={form.subjectCode && form.subject ? `${form.subjectCode}|${form.subject}` : ""} className={inputCls}>
                   <option value="" disabled>เลือกรายวิชา...</option>
-                  {Array.from(new Map(subjects.map(s => [`${s.code}|${s.name}`, s])).values()).map(s=>(
-                    <option key={s.id} value={`${s.code}|${s.name}`}>{s.code} — {s.name} (ปี {s.year} เทอม {s.term})</option>
+                  {subjects.map(s=>(
+                    <option key={s.id} value={`${s.code}|${s.name}|${s.year}|${s.term}`}>{s.code} — {s.name} (ปี {s.year} เทอม {s.term})</option>
                   ))}
                 </select>
               </div>
