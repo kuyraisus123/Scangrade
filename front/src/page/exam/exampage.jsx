@@ -374,6 +374,7 @@ export default function ExamPage() {
           qNumber = (r.qNum - 1) * choices + r.choiceIdx + 1;
         }
         encodedMap[r.id] = qNumber;
+        if (fallbackIdx <= 2) console.log('encodedMap rect.id:', r.id, 'qNum:', r.qNum, 'choiceIdx:', r.choiceIdx, 'qNumber:', qNumber);
       }
     });
 
