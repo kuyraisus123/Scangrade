@@ -292,7 +292,7 @@ def grade(req: GradeRequest):
             set_boxes_sorted = sorted(set_boxes, key=lambda x: x[0].y)
             y_to_set = {b.y: idx+1 for idx, (b, _) in enumerate(set_boxes_sorted)}
 
-            MIN_SET_DENSITY = 0.25
+            MIN_SET_DENSITY = 0.35
             best_set = None
             best_set_density = MIN_SET_DENSITY
             for box, density in set_boxes:
