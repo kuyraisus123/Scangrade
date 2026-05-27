@@ -91,12 +91,17 @@ router.post('/', async (req: Request, res: Response) => {
       }
 
       await prisma.boundingBox.deleteMany({ where: { setId: savedSet.id } })
+      let answerIdx = 0;
       const boundingBoxData = set.rectangles.map((r: any, i: number) => {
-          const choices = set.choices || 5;
-          let questionNumber = i + 1;
+        const choices = set.choices || 5;
+        let questionNumber = 1;
+        if (r.type === 'answer' || !r.type) {
+          answerIdx++;
+          questionNumber = answerIdx;
           if (r.qNum != null && r.choiceIdx != null) {
             questionNumber = (r.qNum - 1) * choices + r.choiceIdx + 1;
           }
+        }
           if (!r.x || !r.w) return null;
 
           if (r.type === 'set_number') {
