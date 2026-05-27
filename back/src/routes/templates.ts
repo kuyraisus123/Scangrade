@@ -165,6 +165,7 @@ router.post('/detect-answer', upload.single('image'), async (req: Request, res: 
     if (req.body.boundingBoxes) {
       try {
         boundingBoxes = JSON.parse(req.body.boundingBoxes)
+        console.log('detect-answer boundingBoxes count:', boundingBoxes.length)
       } catch {
         res.status(400).json({ error: 'boundingBoxes format ไม่ถูกต้อง' })
         return
