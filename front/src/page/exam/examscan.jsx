@@ -219,6 +219,11 @@ export default function ScanExam() {
   if (files?.length) handleFiles(files);
   setInputKey(k => k + 1);
 };
+
+const removeSheet = (id) => {
+  setSheets(prev => prev.filter(s => s.id !== id));
+};
+
   const handleDrop  = (e) => { e.preventDefault(); if (e.dataTransfer.files?.length) handleFiles(e.dataTransfer.files); };
   const rotateSheet = (id) => {
   const sheet = sheets.find(s => s.id === id);
