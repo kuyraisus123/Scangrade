@@ -123,6 +123,7 @@ export default function ScanExam() {
   const [processing, setProcessing] = useState(false);
   const [preview,    setPreview]    = useState(null);
   const [sessionId,  setSessionId]  = useState(null);
+  const [inputKey, setInputKey] = useState(0);
 
   useEffect(() => {
     getTemplates().then(setTemplates).catch(() => {});
@@ -214,10 +215,10 @@ export default function ScanExam() {
   };
 
   const handleFileInput = (e) => {
-    const files = e.target.files;
-    if (files?.length) handleFiles(files);
-    setTimeout(() => { e.target.value = ""; }, 0);
-  };
+  const files = e.target.files;
+  if (files?.length) handleFiles(files);
+  setInputKey(k => k + 1);
+};
   const handleDrop  = (e) => { e.preventDefault(); if (e.dataTransfer.files?.length) handleFiles(e.dataTransfer.files); };
   const rotateSheet = (id) => {
   const sheet = sheets.find(s => s.id === id);
@@ -408,8 +409,8 @@ export default function ScanExam() {
                   <Camera size={15} /> ถ่ายภาพ
                 </button>
               </div>
-              <input type="file" accept=".jpg,.jpeg,.png" multiple ref={fileInputRef} onChange={handleFileInput} className="hidden" />
-              <input type="file" accept="image/*" capture="environment" ref={cameraRef} onChange={handleFileInput} className="hidden" />
+              <input key={`file-${inputKey}`} type="file" accept=".jpg,.jpeg,.png" multiple ref={fileInputRef} onChange={handleFileInput} className="hidden" />
+              <input key={`camera-${inputKey}`} type="file" accept="image/*" capture="environment" ref={cameraRef} onChange={handleFileInput} className="hidden" />
             </div>
 
             <div>
