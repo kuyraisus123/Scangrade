@@ -526,6 +526,14 @@ function SheetCard({ sheet, index, onRemove, onPreview, onRotate }) {
               <span className="text-sm font-semibold text-slate-800">{result.score}/{result.totalScore}</span>
               <span className="text-xs text-slate-400">({Math.round((result.score / result.totalScore) * 100)}%)</span>
             </div>
+            {result.unfilledItems?.length > 0 && (
+            <div className="mt-1.5 flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-xl px-2.5 py-1.5">
+              <AlertCircle size={12} className="text-amber-500 shrink-0" />
+              <span className="text-xs text-amber-700 font-medium">
+                ไม่แน่ใจ {result.unfilledItems.length} ข้อ: {result.unfilledItems.join(', ')}
+              </span>
+            </div>
+          )}
             {result.wrongItems?.length > 0 ? (
               <div className="mt-2">
                 <div className="flex flex-wrap gap-1">
